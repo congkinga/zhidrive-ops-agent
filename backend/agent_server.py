@@ -18,9 +18,9 @@ from pathlib import Path
 from typing import Any
 from urllib.request import Request, urlopen
 
-from rag_engine import RAGEngine
-from vector_rag import VectorRAG
-from storage import (
+from .rag_engine import RAGEngine
+from .vector_rag import VectorRAG
+from .storage import (
     load_cases,
     load_eval_cases,
     load_model_logs,
@@ -29,7 +29,7 @@ from storage import (
 )
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 
 DOC_FILES = [
     "SOUL.md",

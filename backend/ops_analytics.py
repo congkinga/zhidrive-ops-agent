@@ -7,10 +7,10 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from storage import load_cases, load_model_logs
+from .storage import load_cases, load_model_logs
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 OPS_DATA_DIR = ROOT / "data" / "ops"
 
 

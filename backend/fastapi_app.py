@@ -25,8 +25,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import Column, String, Text, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-import agent_server
-from agent_server import (
+from . import agent_server
+from .agent_server import (
     DOC_FILES,
     analyze_feedback,
     answer,
@@ -35,10 +35,10 @@ from agent_server import (
     run_evaluation,
     system_metrics,
 )
-from storage import load_cases
-from vector_rag import VectorRAG
-from retrieval_hybrid import HybridRetriever
-from ops_analytics import (
+from .storage import load_cases
+from .vector_rag import VectorRAG
+from .retrieval_hybrid import HybridRetriever
+from .ops_analytics import (
     get_activities,
     get_content,
     get_funnel,
@@ -48,7 +48,7 @@ from ops_analytics import (
 )
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 DB_PATH = DATA_DIR / "ops.db"
 SQLALCHEMY_DATABASE_URL = os.getenv(
@@ -464,7 +464,7 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "fastapi_app:app",
+        "backend.fastapi_app:app",
         host="127.0.0.1",
         port=int(os.getenv("FASTAPI_PORT", "8766")),
         reload=False,

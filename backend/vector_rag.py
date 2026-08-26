@@ -12,7 +12,7 @@ os.environ.setdefault("HF_ENDPOINT", "https://huggingface.co")
 import chromadb
 from sentence_transformers import SentenceTransformer
 
-from rag_engine import markdown_chunks
+from .rag_engine import markdown_chunks
 
 
 MODEL_NAME = os.getenv("RAG_EMBEDDING_MODEL", "BAAI/bge-small-zh-v1.5")

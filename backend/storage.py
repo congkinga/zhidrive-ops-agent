@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 CASES_FILE = DATA_DIR / "cases" / "cases.json"
 EVAL_FILE = DATA_DIR / "eval" / "eval_cases.json"

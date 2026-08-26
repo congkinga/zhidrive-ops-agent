@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE 8766
 
-CMD ["uvicorn", "fastapi_app:app", "--host", "0.0.0.0", "--port", "8766"]
+CMD ["uvicorn", "backend.fastapi_app:app", "--host", "0.0.0.0", "--port", "8766"]

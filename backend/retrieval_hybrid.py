@@ -5,11 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from rag_engine import RAGEngine
-from vector_rag import VectorRAG
+from .rag_engine import RAGEngine
+from .vector_rag import VectorRAG
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 DOC_FILES = [
     "SOUL.md",
     "README.md",
