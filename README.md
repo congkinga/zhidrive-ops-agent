@@ -1,113 +1,109 @@
-# 智驾产品体验运营增长实验
+# 智驾运营 Agent
 
-这是一个面向智能驾驶产品运营场景的产品原型，基于开源项目 [tsingyuai/growth-lab](https://github.com/tsingyuai/growth-lab) 的“观察、行动、复盘”框架实现。
+面向智能驾驶产品运营场景的 AI 产品运营实战项目，将自然语言体验反馈转化为可派发、可验证、可复盘的运营工单。
 
-## 项目解决的问题
+## 项目背景
 
-智驾体验反馈经常停留在“不好用、有点慌、变道犹豫”等主观描述里。这个项目把它转成可定位、可派发、可验证、可复盘的标准化运营任务。
+智驾产品运营中，大量 NOA 体验反馈仍停留在“变道犹豫、NOA 降级、接管提醒晚”等主观描述。问题定位依赖人工归因，产品、研发、测试、硬件之间的协同成本较高，闭环不完整。
 
-## 当前产物
+本项目通过 Agent、RAG 和结构化运营流程，把模糊反馈自动转化为场景、严重度、问题维度、责任方、短期动作和验证方式。
 
-- 产品理解：`SOUL.md`
-- 静态 Demo：`product/landing/zhijia-nova-ops.html`
-- 聊天 Agent 原型：`product/landing/zhijia-agent.html`
-- RAG 检索引擎：`rag_engine.py`
-- 公开行业观察：`docs/zhijia-industry-observation.md`
-- SEO 调研与页面审阅：`memory/run-seo-page-loop/`
-- Agent 架构说明：`docs/agent-architecture.md`
-- 项目总说明：`CASE_STUDY.md`
+## 项目截图
+
+### 官网首页
+
+![官网首页](docs/screenshots/hero.png)
+
+### 运营增长看板
+
+![运营增长看板](docs/screenshots/ops-dashboard.png)
+
+### 案例库与 RAG 检索
+
+![案例库与 RAG 检索](docs/screenshots/case-dashboard.png)
+
+### AI 运营控制台
+
+![AI 运营控制台](docs/screenshots/console.png)
+
+## 核心能力
+
+- 场景评测：覆盖城市道路、高速、变道、泊车、环岛等高频场景。
+- 五维归因：感知、决策、交互、硬件适配、场景边界。
+- 问题闭环：责任方、短期动作、验证方式、复盘结论。
+- RAG 知识库：ChromaDB、sentence-transformers、BM25、RRF 混合检索。
+- 运营增长看板：反馈处理漏斗、用户分层、活动触达、内容互动。
+- Agent 工作流：LangChain、LangGraph、结构化输出与流式响应。
+
+## 技术栈
+
+- Python
+- FastAPI
+- LangChain / LangGraph
+- ChromaDB
+- sentence-transformers
+- SQLAlchemy
+- DeepSeek / OpenAI
+- Docker / Nginx
+
+## 目录结构
+
+```text
+.
+├── backend/       # Python 后端与 Agent 逻辑
+├── website/       # 官网与运营看板
+├── product/       # Agent Demo 页面
+├── docs/          # 项目文档与截图
+├── data/          # 案例、用户分层、活动与知识库数据
+├── tests/         # pytest 测试
+└── deploy/        # Docker、Nginx 部署配置
+```
 
 ## 快速运行
 
-启动 Agent 服务：
-
 ```powershell
-& '.\.venv\Scripts\python.exe' agent_server.py
+cd zhidrive-ops-agent
+
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m backend.fastapi_app
 ```
 
-然后访问：
+访问：
 
-`http://127.0.0.1:8765/product/landing/zhijia-agent.html`
+`http://127.0.0.1:8766/website/index.html`
 
-也可以直接打开静态表单：
-
-`product/landing/zhijia-nova-ops.html`
-
-也可以在本目录启动静态服务器：
+## 运行测试
 
 ```powershell
-python -m http.server 8080
+python -m pytest
 ```
 
-然后访问 `http://localhost:8080/product/landing/zhijia-nova-ops.html`
-
-## 可选大模型配置
-
-不配置 API Key 时，Agent 使用本地文档检索和规则回答。
-
-推荐在项目根目录创建 `.env.local`：
+## Docker 运行
 
 ```powershell
-OPENAI_API_KEY=your-key
-OPENAI_MODEL=gpt-4.1-mini
+docker compose -f deploy/docker-compose.yml up --build
 ```
 
-DeepSeek：
+## 环境变量
 
-```powershell
+在项目根目录创建 `.env.local`：
+
+```env
 DEEPSEEK_API_KEY=your-key
 DEEPSEEK_MODEL=deepseek-chat
 ```
 
-也可以直接在启动服务前设置环境变量：
+也可以使用 OpenAI：
 
-```powershell
-$env:OPENAI_API_KEY="your-key"
-python agent_server.py
+```env
+OPENAI_API_KEY=your-key
+OPENAI_MODEL=gpt-4.1-mini
 ```
 
-不要把 Key 写进 `agent_server.py`、HTML 或任何会提交到 Git 的文件。
+不要将 API Key 提交到 Git。
 
-## 核心流程
+## 项目边界
 
-```text
-场景录入
--> 现象与证据整理
--> 五维问题分类
--> 严重度标记与责任方建议
--> 短期动作
--> 验证方式
--> 复盘口径
-```
-
-## 智能解析
-
-Agent 支持把自然语言体验反馈自动解析为结构化问题记录：
-
-```text
-用户反馈
--> RAG 检索相关知识
--> DeepSeek 抽取场景、严重度、问题维度、责任方
--> 输出可验证的结构化结果
-```
-
-## 系统能力
-
-- RAG 混合检索：TF-IDF + BM25
-- DeepSeek / OpenAI 可选大模型
-- 自然语言体验反馈结构化分析
-- 多轮会话上下文
-- 案例库与评估集
-- 模型调用日志与系统指标
-- Markdown 运行报告
-
-## 边界
-
-- 不包含博世内部数据
-- 不公开未确认的具体车型缺陷
-- 不把公开行业趋势写成个人实测结论
-- 当前 Demo 不连接后端，不保存输入
-
-## 上游说明
-
-本项目基于 Growth Lab 的框架和目录结构进行二次开发。上游 README 保留在 `UPSTREAM_GROWTH_LAB.md`。
+本项目是个人 AI 产品运营实战项目，不包含博世内部数据，不公开未确认的车型缺陷，不把行业趋势写成个人实测结论。
