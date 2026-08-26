@@ -1,0 +1,63 @@
+{
+  "segments": [
+    {
+      "name": "高频反馈用户",
+      "size": 34,
+      "share": 34.0,
+      "weekly_active_rate": 72.0,
+      "description": "每周主动提交反馈，主要来自产品运营与测试团队。"
+    },
+    {
+      "name": "周期性反馈用户",
+      "size": 42,
+      "share": 42.0,
+      "weekly_active_rate": 38.0,
+      "description": "在版本评测周期集中提交问题，活动后活跃度回落。"
+    },
+    {
+      "name": "低活跃用户",
+      "size": 24,
+      "share": 24.0,
+      "weekly_active_rate": 11.0,
+      "description": "只在被点名或出现严重问题时使用。"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "U001",
+      "name": "产品运营-A",
+      "role": "产品运营",
+      "segment": "高频反馈用户",
+      "feedback_count": 38,
+      "pain_points": ["问题定位慢", "跨团队沟通成本高"],
+      "last_active": "2026-08-20"
+    },
+    {
+      "id": "U002",
+      "name": "测试工程师-B",
+      "role": "测试",
+      "segment": "周期性反馈用户",
+      "feedback_count": 26,
+      "pain_points": ["问题复现路径不完整", "责任方不明确"],
+      "last_active": "2026-08-18"
+    },
+    {
+      "id": "U003",
+      "name": "研发工程师-C",
+      "role": "研发",
+      "segment": "低活跃用户",
+      "feedback_count": 12,
+      "pain_points": ["反馈字段过多", "缺少自动归因"],
+      "last_active": "2026-08-12"
+    },
+    {
+      "id": "U004",
+      "name": "硬件协同-D",
+      "role": "硬件",
+      "segment": "周期性反馈用户",
+      "feedback_count": 18,
+      "pain_points": ["场景边界不清晰", "验证标准不统一"],
+      "last_active": "2026-08-19"
+    }
+  ]
+}

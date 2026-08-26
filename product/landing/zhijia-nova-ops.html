@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>智驾产品体验运营助手：NOA 场景评测、问题分类与闭环模板</title>
+  <meta name="description" content="把智驾体验问题拆成场景、现象、证据、五维归因和闭环动作，形成可派发、可验证、可复盘的标准化问题记录。">
+  <style>
+    :root {
+      --bg: #0a1015;
+      --panel: #101922;
+      --panel-soft: #14212d;
+      --text: #eef6fa;
+      --muted: #8ea5b4;
+      --line: #253542;
+      --line-strong: #324a5b;
+      --accent: #3fd8ff;
+      --accent-dark: #9cecff;
+      --danger: #ff6670;
+      --success: #5fe0a7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      line-height: 1.6;
+      letter-spacing: 0;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(63, 216, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(63, 216, 255, 0.025) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    header { background: rgba(16, 25, 34, 0.92); border-bottom: 1px solid var(--line); padding: 18px 24px; position: relative; z-index: 1; }
+    header h1 { font-size: 20px; margin: 0; }
+    header p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+    main { max-width: 1180px; margin: 0 auto; padding: 24px; position: relative; z-index: 1; }
+    .grid { display: grid; grid-template-columns: 360px 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px; }
+    h2 { font-size: 17px; margin: 0 0 14px; }
+    .field { margin-bottom: 14px; }
+    label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 13px; color: #d6e9f2; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 9px 10px;
+      font: inherit;
+      color: var(--text);
+      background: #0b1219;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(63, 216, 255, 0.08); }
+    textarea { min-height: 100px; resize: vertical; }
+    button {
+      border: 0;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #061016;
+      font-weight: 700;
+      padding: 10px 15px;
+      font: inherit;
+      cursor: pointer;
+    }
+    button:hover { background: var(--accent-dark); }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 7px; }
+    .tag { border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 9px; background: rgba(63, 216, 255, 0.04); color: #c9e9f7; font-size: 13px; cursor: pointer; }
+    .tag.active { background: rgba(63, 216, 255, 0.14); border-color: var(--accent); color: var(--accent-dark); }
+    .result { margin-top: 0; }
+    .metric { font-size: 28px; font-weight: 800; color: var(--accent); }
+    .small { color: var(--muted); font-size: 13px; }
+    .section { margin-top: 24px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 620px) { .row { grid-template-columns: 1fr; } }
+    .issue-box { border-left: 4px solid var(--accent); padding: 12px 14px; background: var(--panel-soft); border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+    th, td { border-bottom: 1px solid var(--line); padding: 9px 8px; text-align: left; vertical-align: top; }
+    th { background: var(--panel-soft); color: #d6e9f2; }
+    code { background: rgba(63, 216, 255, 0.08); border-radius: 4px; padding: 2px 5px; color: #c9e9f7; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>智驾产品体验运营助手</h1>
+    <p>把一条体验反馈拆成场景、现象、证据、归因和闭环动作。页面不保存输入，不连接后端。</p>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="panel">
+        <h2>录入体验问题</h2>
+
+        <div class="field">
+          <label>场景</label>
+          <select id="scenario">
+            <option>城市道路</option>
+            <option>高速道路</option>
+            <option>变道</option>
+            <option>跟车</option>
+            <option>避障</option>
+            <option>泊车</option>
+            <option>园区道路</option>
+            <option>掉头</option>
+            <option>环岛</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>现象描述</label>
+          <textarea id="observation" placeholder="例如：城市道路临近路口时，NOA 提前退出，未给出足够接管时间。"></textarea>
+        </div>
+
+        <div class="field">
+          <label>严重度</label>
+          <select id="severity">
+            <option>S</option>
+            <option>A</option>
+            <option>B</option>
+            <option>C</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>证据链接</label>
+          <input id="evidence" placeholder="可填测试记录、视频、日志或用户反馈链接">
+        </div>
+
+        <div class="field">
+          <label>可能的问题维度</label>
+          <div class="tag-list" id="dimensions">
+            <button type="button" class="tag" data-dim="感知">感知</button>
+            <button type="button" class="tag" data-dim="决策">决策</button>
+            <button type="button" class="tag" data-dim="交互">交互</button>
+            <button type="button" class="tag" data-dim="硬件适配">硬件适配</button>
+            <button type="button" class="tag" data-dim="场景边界">场景边界</button>
+          </div>
+        </div>
+
+        <p><button type="button" id="generate">生成问题记录</button></p>
+      </section>
+
+      <section class="panel result">
+        <h2>问题记录与闭环建议</h2>
+        <div class="issue-box" id="resultBox">
+          <p class="small">填写左侧内容后生成标准化记录。</p>
+        </div>
+
+        <div class="section">
+          <h2>场景评测口径</h2>
+          <table>
+            <thead>
+              <tr><th>场景</th><th>关键观察点</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>城市道路</td><td>路口、行人、非机动车、信号灯、无保护左转</td></tr>
+              <tr><td>高速道路</td><td>进出匝道、长时跟车、大车并线、施工区</td></tr>
+              <tr><td>变道</td><td>变道意图、时机、确认、回退、犹豫</td></tr>
+              <tr><td>跟车</td><td>跟车距离、加减速平顺性、切入切出处理</td></tr>
+              <tr><td>避障</td><td>静态障碍物、异形障碍物、横穿目标、紧急制动</td></tr>
+              <tr><td>泊车</td><td>车位识别、路径规划、障碍物、完成时间</td></tr>
+              <tr><td>园区道路</td><td>NOA 启动、降级、退出、途经点覆盖</td></tr>
+              <tr><td>掉头 / 环岛</td><td>能否完成、退出条件、接管位置、可恢复性</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2>五维问题分类</h2>
+          <table>
+            <thead>
+              <tr><th>维度</th><th>典型判断</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>感知</td><td>目标识别、漏检、误检、轨迹稳定性</td></tr>
+              <tr><td>决策</td><td>路径规划、交互博弈、决策时机、安全边界</td></tr>
+              <tr><td>交互</td><td>提醒、接管、可视化、用户预期管理</td></tr>
+              <tr><td>硬件适配</td><td>传感器、算力、标定、执行器与系统能力匹配</td></tr>
+              <tr><td>场景边界</td><td>ODD、降级、退出、功能可恢复性</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const dimensionButtons = Array.from(document.querySelectorAll('[data-dim]'));
+    const selectedDimensions = new Set();
+    dimensionButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const dim = button.dataset.dim;
+        if (selectedDimensions.has(dim)) {
+          selectedDimensions.delete(dim);
+          button.classList.remove('active');
+        } else {
+          selectedDimensions.add(dim);
+          button.classList.add('active');
+        }
+      });
+    });
+
+    document.getElementById('generate').addEventListener('click', () => {
+      const scenario = document.getElementById('scenario').value;
+      const observation = document.getElementById('observation').value.trim();
+      const severity = document.getElementById('severity').value;
+      const evidence = document.getElementById('evidence').value.trim();
+      const dims = selectedDimensions.size ? Array.from(selectedDimensions).join('、') : '待进一步定位';
+      if (!observation) {
+        alert('请填写现象描述');
+        return;
+      }
+      const ownerMap = {
+        '感知': '感知算法 / 数据标注 / 传感器',
+        '决策': '规划控制 / 产品定义',
+        '交互': 'HMI / 产品运营',
+        '硬件适配': '系统集成 / 硬件 / 标定',
+        '场景边界': '产品定义 / 测试 / 运营'
+      };
+      const owners = selectedDimensions.size
+        ? Array.from(selectedDimensions).map(dim => ownerMap[dim] || '跨部门联合').filter((v, i, a) => a.indexOf(v) === i).join('、')
+        : '产品运营牵头，联合研发与测试定位';
+      const verify = severity === 'S' || severity === 'A'
+        ? '优先复现并补充车端日志、视频与场景参数，明确触发条件。'
+        : '按场景复测并记录触发频率，判断是否为可稳定复现问题。';
+      document.getElementById('resultBox').innerHTML = `
+        <p><strong>场景：</strong>${scenario}</p>
+        <p><strong>严重度：</strong>${severity}</p>
+        <p><strong>问题维度：</strong>${dims}</p>
+        <p><strong>现象：</strong>${observation}</p>
+        <p><strong>证据：</strong>${evidence || '待补充测试记录、视频或日志'}</p>
+        <p><strong>建议责任方：</strong>${owners}</p>
+        <p><strong>短期动作：</strong>${verify}</p>
+        <p><strong>复盘口径：</strong>问题是否可复现、影响场景是否清晰、优化项是否进入排期、验证结果是否达到预期。</p>
+      `;
+    });
+  </script>
+</body>
+</html>

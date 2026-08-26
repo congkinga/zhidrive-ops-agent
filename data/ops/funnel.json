@@ -1,0 +1,9 @@
+{
+  "funnel": [
+    {"stage": "反馈提交", "users": 220},
+    {"stage": "智能解析", "users": 208},
+    {"stage": "责任方确认", "users": 184},
+    {"stage": "问题闭环", "users": 162},
+    {"stage": "复盘完成", "users": 126}
+  ]
+}

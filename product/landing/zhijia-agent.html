@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>智驾运营 Agent</title>
+  <meta name="description" content="面向智能驾驶产品运营场景的体验问题分析 Agent，支持场景评测、五维归因和问题闭环。">
+  <style>
+    :root {
+      --bg: #0a1015;
+      --panel: #101922;
+      --panel-soft: #14212d;
+      --line: #253542;
+      --line-strong: #324a5b;
+      --text: #eef6fa;
+      --muted: #8ea5b4;
+      --cyan: #3fd8ff;
+      --cyan-soft: rgba(63, 216, 255, 0.12);
+      --green: #5fe0a7;
+      --amber: #ffc75f;
+      --red: #ff6670;
+      --user-bg: rgba(63, 216, 255, 0.14);
+      --bot-bg: #111c26;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      letter-spacing: 0;
+      line-height: 1.65;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(63, 216, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(63, 216, 255, 0.025) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 78%);
+    }
+    header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(10, 16, 21, 0.92);
+      backdrop-filter: blur(14px);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(63, 216, 255, 0.55);
+      color: var(--cyan);
+      background: var(--cyan-soft);
+      border-radius: 7px;
+      font-family: Consolas, monospace;
+      font-weight: 700;
+    }
+    .brand h1 { font-size: 17px; margin: 0; letter-spacing: 0; }
+    .brand p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      padding: 5px 9px;
+      color: var(--muted);
+      font-size: 11px;
+      font-family: Consolas, monospace;
+      white-space: nowrap;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 9px rgba(255, 199, 95, 0.65);
+    }
+    .dot.online { background: var(--green); box-shadow: 0 0 9px rgba(95, 224, 167, 0.65); }
+    main { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 24px; height: calc(100vh - 73px); min-height: 560px; }
+    .console {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: rgba(16, 25, 34, 0.94);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+      overflow: hidden;
+    }
+    .console-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 15px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-size: 12px;
+      font-family: Consolas, monospace;
+    }
+    .console-title { color: var(--text); }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      scroll-behavior: smooth;
+    }
+    .message { max-width: 82%; margin-bottom: 16px; }
+    .message.user { margin-left: auto; text-align: right; }
+    .message-label {
+      font-family: Consolas, monospace;
+      font-size: 10px;
+      color: var(--muted);
+      margin: 0 4px 6px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .bubble {
+      display: inline-block;
+      text-align: left;
+      white-space: pre-wrap;
+      border-radius: 7px;
+      padding: 11px 13px;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .user .bubble { background: var(--user-bg); border: 1px solid rgba(63, 216, 255, 0.32); color: #f1fbff; }
+    .bot .bubble { background: var(--bot-bg); border: 1px solid var(--line); color: var(--text); }
+    .quick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .quick button {
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      background: rgba(63, 216, 255, 0.05);
+      color: #c9e9f7;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .quick button:hover { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-soft); }
+    .source-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .source-tag {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 10px;
+      font-family: Consolas, monospace;
+      padding: 3px 7px;
+    }
+    .input-zone { border-top: 1px solid var(--line); padding: 14px 15px 16px; background: rgba(10, 16, 21, 0.76); }
+    .input-row { display: flex; gap: 10px; }
+    input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 11px 13px;
+      background: #0b1219;
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+    input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(63, 216, 255, 0.08); }
+    button.primary {
+      border: 0;
+      border-radius: 6px;
+      background: var(--cyan);
+      color: #061016;
+      font-weight: 700;
+      padding: 0 17px;
+      cursor: pointer;
+    }
+    button.primary:hover { background: #8cecff; }
+    .shortcuts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .shortcuts button {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .shortcuts button:hover { border-color: var(--cyan); color: var(--cyan); }
+    @media (max-width: 720px) {
+      header { align-items: flex-start; flex-direction: column; }
+      .status { justify-content: flex-start; }
+      main { padding: 12px; height: calc(100vh - 132px); }
+      .message { max-width: 92%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-mark">ZD</div>
+      <div>
+        <h1>智驾运营 Agent</h1>
+        <p>场景评测 · 五维归因 · 问题闭环</p>
+      </div>
+    </div>
+    <div class="status">
+      <div class="chip"><span class="dot" id="modeDot"></span><span id="modeStatus">CHECKING</span></div>
+      <div class="chip">KNOWLEDGE BASE READY</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="console">
+      <div class="console-head">
+        <span class="console-title">ZHIDRIVE OPS / AGENT CONSOLE</span>
+        <span>v0.2</span>
+      </div>
+      <div class="messages" id="messages"></div>
+      <div class="input-zone">
+        <div class="input-row">
+          <input id="input" type="text" placeholder="输入体验问题或产品问题" autocomplete="off">
+          <button class="primary" id="send" type="button">发送</button>
+        </div>
+        <div class="shortcuts" id="quickActions"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('input');
+    const sendButton = document.getElementById('send');
+    const quickActions = document.getElementById('quickActions');
+    const modeStatus = document.getElementById('modeStatus');
+    const modeDot = document.getElementById('modeDot');
+
+    let recordState = null;
+    let analyzeMode = false;
+    const chatHistory = [];
+    const record = {};
+
+    const quickList = [
+      '这个项目是做什么的',
+      '怎么操作',
+      '五维分类是什么',
+      '帮我记录一个体验问题',
+      '帮我分析一条体验反馈',
+      '查看系统指标',
+      '查看最近案例',
+      '运行评估',
+      '生成报告'
+    ];
+
+    function addMessage(role, text) {
+      const wrap = document.createElement('div');
+      wrap.className = `message ${role}`;
+      const label = document.createElement('div');
+      label.className = 'message-label';
+      label.textContent = role === 'user' ? 'OPERATOR' : 'AGENT';
+      wrap.appendChild(label);
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = text;
+      wrap.appendChild(bubble);
+      messages.appendChild(wrap);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function addBotMessage(text, buttons, sources) {
+      const wrap = document.createElement('div');
+      wrap.className = 'message bot';
+      const label = document.createElement('div');
+      label.className = 'message-label';
+      label.textContent = 'AGENT';
+      wrap.appendChild(label);
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = text;
+      wrap.appendChild(bubble);
+      if (sources && sources.length) {
+        const sourceList = document.createElement('div');
+        sourceList.className = 'source-list';
+        sources.forEach(source => {
+          const tag = document.createElement('span');
+          tag.className = 'source-tag';
+          tag.textContent = source;
+          sourceList.appendChild(tag);
+        });
+        wrap.appendChild(sourceList);
+      }
+      if (buttons && buttons.length) {
+        const group = document.createElement('div');
+        group.className = 'quick';
+        buttons.forEach(item => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = item;
+          button.addEventListener('click', () => send(item));
+          group.appendChild(button);
+        });
+        wrap.appendChild(group);
+      }
+      messages.appendChild(wrap);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function renderQuickActions() {
+      quickActions.innerHTML = '';
+      quickList.forEach(label => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.addEventListener('click', () => send(label));
+        quickActions.appendChild(button);
+      });
+    }
+
+    async function updateStatus() {
+      try {
+        const response = await fetch('/api/health');
+        const data = await response.json();
+        if (data.mode === 'llm') {
+          modeStatus.textContent = 'LLM ONLINE';
+          modeDot.classList.add('online');
+        } else {
+          modeStatus.textContent = 'LOCAL MODE';
+        }
+      } catch (error) {
+        modeStatus.textContent = 'LOCAL MODE';
+      }
+    }
+
+    function fallbackAnswerGeneral(text) {
+      if (/五维|分类|归因/.test(text)) {
+        addBotMessage('五个维度是：感知、决策、交互、硬件适配、场景边界。先判断问题属于哪个方向，再决定责任方和验证方式。');
+        return;
+      }
+      if (/做什么|是什么|干嘛|介绍/.test(text)) {
+        addBotMessage('这个项目是智驾产品体验运营助手。它把主观体验反馈转成场景、现象、证据、问题维度、责任方和闭环动作。');
+      } else if (/怎么用|操作|使用|打开/.test(text)) {
+        addBotMessage('打开 zhijia-nova-ops.html，选择场景，填写现象，选择严重度和问题维度，再点击生成问题记录。');
+      } else if (/竞品|行业|趋势|公开/.test(text)) {
+        addBotMessage('公开观察主要看城市 NOA 使用率、园区和环岛等场景降级、用户投诉中的感知与交互问题，以及行业资料中的体验闭环需求。');
+      } else if (/接入|大模型|api|llm|gpt|claude|deepseek|qwen/.test(text)) {
+        addBotMessage('当前服务支持可选大模型。设置 OPENAI_API_KEY 或 DEEPSEEK_API_KEY 后，会自动调用对应模型；没有设置时使用本地文档检索回答。');
+      } else if (/责任方|闭环|复盘/.test(text)) {
+        addBotMessage('闭环模板包括问题描述、判断依据、短期动作、验证方式、复盘结论。这样反馈不会停在主观体验描述。');
+      } else if (/分析|解析|提取/.test(text)) {
+        startAnalyze();
+      } else if (/记录|录入|体验问题/.test(text)) {
+        startRecord();
+      } else {
+        addBotMessage('我可以回答项目说明、使用方法、五维分类、行业观察和问题闭环。也可以输入“帮我记录一个体验问题”。');
+      }
+    }
+
+    async function answerGeneral(text) {
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, history: chatHistory.slice(-8) })
+        });
+        if (!response.ok) throw new Error('request failed');
+        const data = await response.json();
+        if (!data.reply) throw new Error('empty reply');
+        chatHistory.push({ role: 'assistant', content: data.reply });
+        addBotMessage(data.reply, null, data.sources || []);
+      } catch (error) {
+        fallbackAnswerGeneral(text);
+      }
+    }
+
+    function formatMetrics(data) {
+      return [
+        `运行模式：${data.mode || 'unknown'}`,
+        `RAG 文档块：${data.rag_chunks || 0}`,
+        `文档数量：${data.documents || 0}`,
+        `案例数量：${data.cases || 0}`,
+        `评估样本：${data.eval_cases || 0}`,
+        `模型调用：${data.model_calls || 0}`,
+        `平均耗时：${data.avg_latency_ms || 0} ms`
+      ].join('\n');
+    }
+
+    async function handleCommand(text) {
+      if (text.includes('查看系统指标')) {
+        try {
+          const response = await fetch('/api/metrics');
+          const data = await response.json();
+          addBotMessage(formatMetrics(data));
+        } catch (error) {
+          addBotMessage('系统指标暂时不可用。');
+        }
+        return true;
+      }
+      if (text.includes('运行评估')) {
+        addBotMessage('正在运行评估，会调用大模型解析评估样本。');
+        try {
+          const response = await fetch('/api/eval', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+          const data = await response.json();
+          addBotMessage(`评估完成：${data.total} 个样本，平均分 ${data.avg_score}`);
+        } catch (error) {
+          addBotMessage('评估运行失败。');
+        }
+        return true;
+      }
+      if (text.includes('生成报告')) {
+        try {
+          const response = await fetch('/api/report');
+          const data = await response.json();
+          addBotMessage(data.report || '暂无报告。');
+        } catch (error) {
+          addBotMessage('报告生成失败。');
+        }
+        return true;
+      }
+      if (text.includes('查看最近案例')) {
+        try {
+          const response = await fetch('/api/cases');
+          const data = await response.json();
+          const cases = data.cases || [];
+          if (!cases.length) {
+            addBotMessage('暂无案例。');
+          } else {
+            addBotMessage(cases.slice(0, 5).map((item, index) => {
+              const analysis = item.analysis || {};
+              return `${index + 1}. ${item.input}\n   场景：${analysis.scenario || '待补充'} | 严重度：${analysis.severity || '待补充'} | 维度：${Array.isArray(analysis.dimensions) ? analysis.dimensions.join('、') : analysis.dimensions || '待补充'}`;
+            }).join('\n'));
+          }
+        } catch (error) {
+          addBotMessage('案例读取失败。');
+        }
+        return true;
+      }
+      return false;
+    }
+
+    function startRecord() {
+      analyzeMode = false;
+      recordState = 'scenario';
+      Object.keys(record).forEach(key => delete record[key]);
+      addBotMessage('可以。先告诉我场景，例如：城市道路、高速道路、变道、跟车、避障、泊车、园区道路、掉头、环岛。', [
+        '城市道路',
+        '高速道路',
+        '变道',
+        '泊车'
+      ]);
+    }
+
+    function startAnalyze() {
+      recordState = null;
+      analyzeMode = true;
+      addBotMessage('请粘贴一条智驾体验反馈，我会把它转成结构化问题记录。例如：城市道路无保护左转时系统犹豫，进入路口后 NOA 降级，接管提醒较晚。');
+    }
+
+    async function handleAnalyze(text) {
+      analyzeMode = false;
+      addBotMessage('正在解析这条体验反馈。');
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        if (!response.ok) throw new Error('request failed');
+        const data = await response.json();
+        const item = data.analysis || {};
+        const dimensions = Array.isArray(item.dimensions) ? item.dimensions.join('、') : item.dimensions || '待补充';
+        const result = [
+          '结构化分析结果：',
+          `场景：${item.scenario || '待补充证据'}`,
+          `严重度：${item.severity || '待补充证据'}`,
+          `问题维度：${dimensions}`,
+          `建议责任方：${item.suggested_owner || '待补充证据'}`,
+          `短期动作：${item.short_term_action || '待补充证据'}`,
+          `验证方式：${item.verification || '待补充证据'}`,
+          `风险提示：${item.risk || '待补充证据'}`
+        ].join('\n');
+        addBotMessage(result, null, data.sources || []);
+      } catch (error) {
+        addBotMessage('智能解析失败，当前环境可能未连接服务端。可以改用“帮我记录一个体验问题”手动录入。');
+      }
+    }
+
+    function handleRecord(text) {
+      if (recordState === 'scenario') {
+        record.scenario = text.trim();
+        recordState = 'observation';
+        addBotMessage('现象是什么？请描述具体场景和系统表现，例如：无保护左转时系统犹豫，进入路口后 NOA 降级。');
+        return;
+      }
+      if (recordState === 'observation') {
+        record.observation = text.trim();
+        recordState = 'severity';
+        addBotMessage('严重度选哪个？', ['S', 'A', 'B', 'C']);
+        return;
+      }
+      if (recordState === 'severity') {
+        record.severity = text.trim().toUpperCase();
+        recordState = 'dimensions';
+        addBotMessage('可能涉及哪些维度？可以回复一个或多个：感知、决策、交互、硬件适配、场景边界。', [
+          '感知',
+          '决策',
+          '交互',
+          '场景边界'
+        ]);
+        return;
+      }
+      if (recordState === 'dimensions') {
+        record.dimensions = text.trim();
+        recordState = null;
+        addBotMessage([
+          '已生成体验问题记录：',
+          `场景：${record.scenario}`,
+          `现象：${record.observation}`,
+          `严重度：${record.severity}`,
+          `问题维度：${record.dimensions}`,
+          '建议下一步：补充测试记录、视频或日志，判断问题是否可复现，再输出责任方和验证方式。'
+        ].join('\n'));
+        addBotMessage('还需要我解释“五维分类”或“闭环模板”吗？');
+        return;
+      }
+    }
+
+    function send(text) {
+      const value = text || input.value.trim();
+      if (!value) return;
+      if (!text) input.value = '';
+      addMessage('user', value);
+      if (recordState) {
+        handleRecord(value);
+      } else if (analyzeMode) {
+        void handleAnalyze(value);
+      } else if (value.includes('查看系统指标') || value.includes('运行评估') || value.includes('生成报告') || value.includes('查看最近案例')) {
+        void handleCommand(value);
+      } else {
+        chatHistory.push({ role: 'user', content: value });
+        void answerGeneral(value);
+      }
+    }
+
+    sendButton.addEventListener('click', () => send());
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') send();
+    });
+
+    renderQuickActions();
+    void updateStatus();
+    addBotMessage('你好，我是智驾运营 Agent。可以回答项目说明、操作方法、五维分类、行业观察，也可以引导你录入或智能解析体验问题。');
+  </script>
+</body>
+</html>

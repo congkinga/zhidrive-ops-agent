@@ -1,0 +1,28 @@
+{
+  "content": [
+    {
+      "id": "C001",
+      "type": "图文教程",
+      "title": "如何用五维归因快速定位 NOA 问题",
+      "channel": "内部知识库",
+      "interactions": 340,
+      "conversion": 0.12
+    },
+    {
+      "id": "C002",
+      "type": "短视频脚本",
+      "title": "30 秒看懂 NOA 场景评测流程",
+      "channel": "内部社群",
+      "interactions": 260,
+      "conversion": 0.09
+    },
+    {
+      "id": "C003",
+      "type": "活动文案",
+      "title": "提交高频场景反馈，赢取测试名额",
+      "channel": "邮件/企业微信",
+      "interactions": 180,
+      "conversion": 0.14
+    }
+  ]
+}

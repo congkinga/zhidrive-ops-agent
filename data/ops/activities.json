@@ -1,0 +1,28 @@
+{
+  "activities": [
+    {
+      "name": "NOA 高频场景问题提报活动",
+      "type": "提报激励",
+      "reach": 180,
+      "participants": 72,
+      "conversion": 0.31,
+      "impact": "问题提报量提升 45%"
+    },
+    {
+      "name": "五维归因模板内测",
+      "type": "产品功能推广",
+      "reach": 120,
+      "participants": 58,
+      "conversion": 0.24,
+      "impact": "反馈结构化率提升 22%"
+    },
+    {
+      "name": "AI 运营周报触达",
+      "type": "内容触达",
+      "reach": 240,
+      "participants": 96,
+      "conversion": 0.40,
+      "impact": "周活跃用户提升 18%"
+    }
+  ]
+}

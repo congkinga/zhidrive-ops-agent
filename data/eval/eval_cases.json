@@ -1,0 +1,47 @@
+[
+  {
+    "id": "eval-001",
+    "input": "城市道路无保护左转时系统犹豫，进入路口后 NOA 降级，接管提醒较晚。",
+    "expected": {
+      "scenario": "城市道路",
+      "severity": "A",
+      "dimensions": ["决策", "交互", "场景边界"]
+    }
+  },
+  {
+    "id": "eval-002",
+    "input": "高速道路遇到前方施工区时，系统未提前减速，最后紧急接管。",
+    "expected": {
+      "scenario": "高速道路",
+      "severity": "S",
+      "dimensions": ["感知", "决策", "交互"]
+    }
+  },
+  {
+    "id": "eval-003",
+    "input": "自动泊车时把墙面误识别为可通行区域，车辆靠近墙面后人工刹车。",
+    "expected": {
+      "scenario": "泊车",
+      "severity": "S",
+      "dimensions": ["感知", "决策", "硬件适配"]
+    }
+  },
+  {
+    "id": "eval-004",
+    "input": "园区内部道路进入途经点后 NOA 退出，且后续无法再次开启。",
+    "expected": {
+      "scenario": "园区道路",
+      "severity": "A",
+      "dimensions": ["场景边界", "交互"]
+    }
+  },
+  {
+    "id": "eval-005",
+    "input": "高速变道时系统频繁打转向灯后取消变道，乘客感到车辆左右犹豫。",
+    "expected": {
+      "scenario": "变道",
+      "severity": "B",
+      "dimensions": ["决策", "交互"]
+    }
+  }
+]

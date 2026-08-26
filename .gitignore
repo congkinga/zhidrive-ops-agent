@@ -1,0 +1,33 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+data/ops.db
+data/logs/
+data/chroma/
+data/index/
+
+# Agent runtime data
+data/logs/
+data/index/
+data/chroma/
+data/cases/*.json
+data/eval/*.json
+!data/eval/eval_cases.json
+!data/eval/README.md
+
+# Agent 现场分析产物
+seo-work/
+social-work/
+
+# 真实运营 Memory 默认保留在本地；目录说明和占位文件进入版本控制
+memory/**
+!memory/
+!memory/README.md
+!memory/**/
+!memory/**/.gitkeep
+.vercel
+node_modules/
